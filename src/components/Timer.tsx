@@ -5,6 +5,7 @@ import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/lib/store';
 import { startTimer, stopTimer, decrementTime, resetTimer, setTime } from '@/lib/features/timer/timerSlice';
 import Image from 'next/image';
+import Menu from './Menu';
 
 export default function Timer() {
   const { time, isActive } = useSelector((state: RootState) => state.timer);
@@ -90,9 +91,7 @@ export default function Timer() {
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black">
       <div className="absolute top-10 left-10">
-        <button>
-          <Image src="/menu-ico-trans.png" alt="Menu" width={50} height={50} />
-        </button>
+        <Menu />
       </div>
       {isActive && <h1 className="text-5xl font-bold text-white mb-4 animate-blink">FOCUS TIME!</h1>}
       <button onClick={handleAppleClick} className="mb-4">
