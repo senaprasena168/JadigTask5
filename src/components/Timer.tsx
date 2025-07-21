@@ -162,14 +162,24 @@ export default function Timer() {
       <div className="absolute top-10 left-10">
         <Menu />
       </div>
-      {isActive && <h1 className="text-5xl font-bold text-white mb-4 animate-blink">FOCUS TIME!</h1>}
+      <div className="h-20">
+        {isBeeping ? (
+          <h1 className="text-5xl font-bold text-red-500 mb-4 animate-blink">ALARM!</h1>
+        ) : (
+          isActive && <h1 className="text-5xl font-bold text-white mb-4 animate-blink">FOCUS TIME!</h1>
+        )}
+      </div>
       <motion.div
         animate={isBeeping ? 'shaking' : 'still'}
         variants={appleVariants}
       >
-        <button onClick={handleAppleClick} className="mb-4">
+        <motion.button
+          onClick={handleAppleClick}
+          className="mb-4 cursor-pointer"
+          whileTap={{ scale: 0.95 }}
+        >
           <Image src="/yellowapple.png" alt="Start Timer" width={400} height={400} />
-        </button>
+        </motion.button>
       </motion.div>
       {isEditing ? (
         <form onSubmit={handleTimeSubmit} ref={formRef}>
