@@ -28,7 +28,6 @@ export default function Timer() {
         dispatch(decrementTime());
       }, 10);
     } else if (time === 0 && isActive) {
-      dispatch(stopTimer());
       dispatch(startBeeping());
     }
 
@@ -110,7 +109,7 @@ export default function Timer() {
       if (newTime) {
         const parts = newTime.split(':');
         const minutes = parseInt(parts[0], 10) || 0;
-        const seconds = parseInt(parts[1], 10) || 0;
+        const seconds = parts[1] ? parseInt(parts[1], 10) : 0;
         dispatch(setTime((minutes * 60 + seconds) * 100));
       }
       setIsEditing(false);
