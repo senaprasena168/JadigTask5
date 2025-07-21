@@ -6,7 +6,7 @@ interface TimerState {
 }
 
 const initialState: TimerState = {
-  time: 3000, // 30 seconds in centiseconds
+  time: 120000, // 20 minutes in centiseconds
   isActive: false,
 };
 
@@ -28,11 +28,14 @@ const timerSlice = createSlice({
       }
     },
     resetTimer: (state) => {
-      state.time = 3000;
+      state.time = 120000;
       state.isActive = false;
+    },
+    setTime: (state, action: PayloadAction<number>) => {
+      state.time = action.payload;
     },
   },
 });
 
-export const { startTimer, stopTimer, decrementTime, resetTimer } = timerSlice.actions;
+export const { startTimer, stopTimer, decrementTime, resetTimer, setTime } = timerSlice.actions;
 export default timerSlice.reducer;
