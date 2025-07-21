@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import Image from 'next/image';
 
 export default function Menu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -35,7 +36,7 @@ export default function Menu() {
   return (
     <div className="relative" ref={menuRef}>
       <button onClick={() => setIsOpen(!isOpen)}>
-        <img src="/menu-ico-trans.png" alt="Menu" className="w-12 h-12" />
+        <Image src="/menu-ico-trans.png" alt="Menu" width={50} height={50} />
       </button>
       <AnimatePresence>
         {isOpen && (
@@ -49,13 +50,17 @@ export default function Menu() {
             {showAbout ? (
               <div onClick={() => setShowAbout(false)} className="cursor-pointer">
                 <p className="text-sm text-gray-700">
-                  timer app that uses redux, useSelector, useDispatch, component A, component B, input form, and display the input in a timer form. make to fulfill task 5 from Fullstack Web Programming JDA 2025
+                  A timer app that uses redux, useSelector, useDispatch, component A, component B, input form, and display the input in a timer form. made to fulfill task 5 (meeting 6) from Fullstack Web Programming JDA 2025. thank you for reviewing this!
+                  <br /><br />
+                  attribution:
+                  <br />
+                  beeps3.mp3 by steveygos93 -- <a href="https://freesound.org/s/103588/" target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">https://freesound.org/s/103588/</a> -- License: Attribution 3.0
                 </p>
               </div>
             ) : (
               <ul>
                 <li>
-                  <a href="https://jadig-task5-git-main-sena-prasenas-projects.vercel.app/" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">
+                  <a href="https://jadig-task5.vercel.app/" target="_blank" rel="noopener noreferrer" className="block px-4 py-2 text-gray-800 hover:bg-gray-200">
                     Vercel Link
                   </a>
                 </li>

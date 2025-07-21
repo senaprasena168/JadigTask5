@@ -3,16 +3,22 @@
 import { useEffect, useState, useRef } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState, AppDispatch } from '@/lib/store';
-import { startTimer, stopTimer, decrementTime, resetTimer, setTime } from '@/lib/features/timer/timerSlice';
+import { startTimer, stopTimer, decrementTime, resetTimer, setTime, startBeeping, stopBeeping } from '@/lib/features/timer/timerSlice';
 import Image from 'next/image';
+import { motion } from 'framer-motion';
 import Menu from './Menu';
 
 export default function Timer() {
-  const { time, isActive } = useSelector((state: RootState) => state.timer);
+  const { time, isActive, isBeeping } = useSelector((state: RootState) => state.timer);
   const dispatch = useDispatch<AppDispatch>();
   const [isEditing, setIsEditing] = useState(false);
   const [newTime, setNewTime] = useState('');
   const formRef = useRef<HTMLFormElement>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('/tinot.mp3');
+  }, []);
 
   useEffect(() => {
     let interval: NodeJS.Timeout | undefined;
@@ -21,8 +27,9 @@ export default function Timer() {
       interval = setInterval(() => {
         dispatch(decrementTime());
       }, 10);
-    } else if (time === 0) {
+    } else if (time === 0 && isActive) {
       dispatch(stopTimer());
+      dispatch(startBeeping());
     }
 
     return () => {
@@ -33,9 +40,47 @@ export default function Timer() {
   }, [isActive, time, dispatch]);
 
   useEffect(() => {
+    let beepInterval: NodeJS.Timeout | undefined;
+    let beepTimeout: NodeJS.Timeout | undefined;
+
+    if (isBeeping) {
+      const playSound = () => {
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current.play();
+        }
+      };
+      playSound();
+      beepInterval = setInterval(playSound, 1000);
+      beepTimeout = setTimeout(() => {
+        dispatch(stopBeeping());
+      }, 60000);
+    }
+
+    return () => {
+      if (beepInterval) {
+        clearInterval(beepInterval);
+      }
+      if (beepTimeout) {
+        clearTimeout(beepTimeout);
+      }
+    };
+  }, [isBeeping, dispatch]);
+
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (formRef.current && !formRef.current.contains(event.target as Node)) {
+        if (newTime) {
+          const [minutes, seconds] = newTime.split(':').map(Number);
+          if (!isNaN(minutes) && !isNaN(seconds)) {
+            dispatch(setTime((minutes * 60 + seconds) * 100));
+          } else if (!isNaN(minutes)) {
+            dispatch(setTime(minutes * 100));
+          }
+        }
         setIsEditing(false);
+        setNewTime('');
       }
     };
 
@@ -58,7 +103,22 @@ export default function Timer() {
   };
 
   const handleAppleClick = () => {
-    dispatch(isActive ? stopTimer() : startTimer());
+    if (isBeeping) {
+      dispatch(stopBeeping());
+      dispatch(resetTimer());
+    } else if (isEditing) {
+      if (newTime) {
+        const parts = newTime.split(':');
+        const minutes = parseInt(parts[0], 10) || 0;
+        const seconds = parseInt(parts[1], 10) || 0;
+        dispatch(setTime((minutes * 60 + seconds) * 100));
+      }
+      setIsEditing(false);
+      setNewTime('');
+      dispatch(startTimer());
+    } else {
+      dispatch(isActive ? stopTimer() : startTimer());
+    }
   };
 
   const handleTimeClick = () => {
@@ -88,15 +148,30 @@ export default function Timer() {
     }
   };
 
+  const appleVariants = {
+    shaking: {
+      x: [0, -5, 5, -5, 5, 0],
+      transition: { duration: 0.5, repeat: Infinity },
+    },
+    still: {
+      x: 0,
+    },
+  };
+
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black">
       <div className="absolute top-10 left-10">
         <Menu />
       </div>
       {isActive && <h1 className="text-5xl font-bold text-white mb-4 animate-blink">FOCUS TIME!</h1>}
-      <button onClick={handleAppleClick} className="mb-4">
-        <Image src="/yellowapple.png" alt="Start Timer" width={400} height={400} />
-      </button>
+      <motion.div
+        animate={isBeeping ? 'shaking' : 'still'}
+        variants={appleVariants}
+      >
+        <button onClick={handleAppleClick} className="mb-4">
+          <Image src="/yellowapple.png" alt="Start Timer" width={400} height={400} />
+        </button>
+      </motion.div>
       {isEditing ? (
         <form onSubmit={handleTimeSubmit} ref={formRef}>
           <input
