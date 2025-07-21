@@ -1,10 +1,10 @@
 import { configureStore } from '@reduxjs/toolkit';
-import nameReducer from './features/name/nameSlice';
+import timerReducer from './features/timer/timerSlice';
 
 export const makeStore = () => {
   return configureStore({
     reducer: {
-      name: nameReducer,
+      timer: timerReducer,
     },
   });
 };
