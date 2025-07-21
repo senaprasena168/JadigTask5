@@ -67,32 +67,6 @@ export default function Timer() {
   }, [isBeeping, dispatch]);
 
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (formRef.current && !formRef.current.contains(event.target as Node)) {
-        if (newTime) {
-          const [minutes, seconds] = newTime.split(':').map(Number);
-          if (!isNaN(minutes) && !isNaN(seconds)) {
-            dispatch(setTime((minutes * 60 + seconds) * 100));
-          } else if (!isNaN(minutes)) {
-            dispatch(setTime(minutes * 100));
-          }
-        }
-        setIsEditing(false);
-        setNewTime('');
-      }
-    };
-
-    if (isEditing) {
-      document.addEventListener('mousedown', handleClickOutside);
-    } else {
-      document.removeEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isEditing]);
 
   const formatTime = (centiseconds: number) => {
     const minutes = Math.floor(centiseconds / 6000);
@@ -106,12 +80,6 @@ export default function Timer() {
       dispatch(stopBeeping());
       dispatch(resetTimer());
     } else if (isEditing) {
-      if (newTime) {
-        const parts = newTime.split(':');
-        const minutes = parseInt(parts[0], 10) || 0;
-        const seconds = parts[1] ? parseInt(parts[1], 10) : 0;
-        dispatch(setTime((minutes * 60 + seconds) * 100));
-      }
       setIsEditing(false);
       setNewTime('');
       dispatch(startTimer());
@@ -129,11 +97,11 @@ export default function Timer() {
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.target.value.replace(/[^0-9]/g, '');
     if (input.length <= 4) {
-      if (input.length >= 3) {
-        setNewTime(`${input.slice(0, 2)}:${input.slice(2)}`);
-      } else {
-        setNewTime(input);
-      }
+      setNewTime(input);
+      const paddedInput = input.padStart(4, '0');
+      const minutes = parseInt(paddedInput.slice(0, 2), 10);
+      const seconds = parseInt(paddedInput.slice(2, 4), 10);
+      dispatch(setTime((minutes * 60 + seconds) * 100));
     }
   };
 
@@ -185,7 +153,7 @@ export default function Timer() {
         <form onSubmit={handleTimeSubmit} ref={formRef}>
           <input
             type="text"
-            value={newTime}
+            value={newTime.replace(/(\d{2})(?=\d)/, '$1:')}
             onChange={handleTimeChange}
             className="text-5xl font-bold text-white bg-black text-center"
             placeholder="00:00"
